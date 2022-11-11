@@ -37,18 +37,17 @@ namespace EmployeeManagementWebAPI.Controllers
         }
 
         // GET: api/Managers
-        [HttpGet]
-        [Route("Managers")]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetAllManagers(string id)
+        [Route("Managers"), HttpGet]
+        public async Task<ActionResult> GetAllManagers()
         {
             try
             {
-                var managers = await _dbcontext.Employees.Where(s => s.EmployeeId == id && s.ManagerName != null).ToListAsync();
-                if (managers == null)
+                List<Employee> managers = await _dbcontext.Employees.Where(s => !s.ManagerName.Equals("")).ToListAsync();
+                if (managers != null)
                 {
-                    return NotFound();
+                    return Ok(managers);
                 }
-                return managers;
+                return Ok("not found managers");
             }
             catch (Exception)
             {
@@ -64,7 +63,7 @@ namespace EmployeeManagementWebAPI.Controllers
 
         // POST api/add_new_employee
         [HttpPost]
-        public async Task<ActionResult<Employee>> AddEmployee(Employee employee)
+        public async Task<ActionResult> AddEmployee(Employee employee)
         {
             try
             {
@@ -110,7 +109,7 @@ namespace EmployeeManagementWebAPI.Controllers
                 }
 
             }
-            return NoContent();
+            return Ok("employee edited");
         }
 
         // DELETE api/Employees/5
@@ -126,10 +125,10 @@ namespace EmployeeManagementWebAPI.Controllers
             {
                 return NotFound();
             }
-            _dbcontext.Employees.Remove(employee);
+            _dbcontext.Entry(employee).State = EntityState.Deleted;
             await _dbcontext.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("employee deleted");
         }
 
         private bool EmployeeExists(string id)
