@@ -1,5 +1,4 @@
-﻿using EmployeeManagementWebAPI.dbContext;
-using EmployeeManagementWebAPI.Models;
+﻿using EmployeeManagementWebAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,40 +8,42 @@ namespace EmployeeManagementWebAPI.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly EmployeeManagementWebAPIContext _context;
+        private readonly EmployeeManagementSystemDbContext _dbcontext;
 
-        public EmployeeController(EmployeeManagementWebAPIContext context)
+        public EmployeeController(EmployeeManagementSystemDbContext context)
         {
-            _context = context;
+            _dbcontext = context;
         }
 
         // GET: api/Employees
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Employee>>> GetAllEmployees()
+        [Route("Employees"), HttpGet]
+        public async Task<ActionResult> GetAllEmployees()
         {
+
             try
             {
-                if (_context.Employees == null)
+                List<Employee> employees = await _dbcontext.Employees.ToListAsync();
+                if (employees != null)
                 {
-                    return NotFound();
+                    return Ok(employees);
                 }
-                return await _context.Employees.ToListAsync();
+                return Ok("not found employees");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw new Exception("Not found Employees");
+                return BadRequest(ex.Message);
             }
 
         }
 
         // GET: api/Managers
         [HttpGet]
+        [Route("Managers")]
         public async Task<ActionResult<IEnumerable<Employee>>> GetAllManagers(string id)
         {
             try
             {
-                var managers = await _context.Employees.Where(s => s.EmployeeId == id && s.ManagerName != null).ToListAsync();
+                var managers = await _dbcontext.Employees.Where(s => s.EmployeeId == id && s.ManagerName != null).ToListAsync();
                 if (managers == null)
                 {
                     return NotFound();
@@ -59,12 +60,9 @@ namespace EmployeeManagementWebAPI.Controllers
 
         // GET api/Employees/5
         [HttpGet("{id}")]
-        public async Task<Employee> GetManagerById(string id)
-        {
-            return await _context.Employees.Where(s => s.EmployeeId == id).SingleOrDefaultAsync();
-        }
+        public async Task<Employee> GetManagerById(string id) => await _dbcontext.Employees.Where(s => s.EmployeeId == id).SingleOrDefaultAsync();
 
-        // POST api/add_employee
+        // POST api/add_new_employee
         [HttpPost]
         public async Task<ActionResult<Employee>> AddEmployee(Employee employee)
         {
@@ -74,8 +72,8 @@ namespace EmployeeManagementWebAPI.Controllers
                 {
                     return NotFound();
                 }
-                await _context.Employees.AddAsync(employee);
-                await _context.SaveChangesAsync();
+                await _dbcontext.Employees.AddAsync(employee);
+                await _dbcontext.SaveChangesAsync();
                 return CreatedAtAction(nameof(AddEmployee), new { id = employee.EmployeeId }, employee);
 
             }
@@ -94,11 +92,11 @@ namespace EmployeeManagementWebAPI.Controllers
             {
                 return BadRequest();
             }
-            _context.Entry(employee).State = (Microsoft.EntityFrameworkCore.EntityState)System.Data.Entity.EntityState.Modified;
+            _dbcontext.Entry(employee).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _dbcontext.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -119,24 +117,24 @@ namespace EmployeeManagementWebAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployee(string id)
         {
-            if (_context.Employees == null)
+            if (_dbcontext.Employees == null)
             {
                 return NotFound();
             }
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _dbcontext.Employees.FindAsync(id);
             if (employee == null)
             {
                 return NotFound();
             }
-            _context.Employees.Remove(employee);    
-            await _context.SaveChangesAsync();
+            _dbcontext.Employees.Remove(employee);
+            await _dbcontext.SaveChangesAsync();
 
             return NoContent();
         }
 
         private bool EmployeeExists(string id)
         {
-            return (_context.Employees?.Any(e => e.EmployeeId == id)).GetValueOrDefault();
+            return (_dbcontext.Employees?.Any(e => e.EmployeeId == id)).GetValueOrDefault();
         }
     }
 }

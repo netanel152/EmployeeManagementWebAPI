@@ -5,7 +5,7 @@
 namespace EmployeeManagementWebAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,14 +14,14 @@ namespace EmployeeManagementWebAPI.Migrations
                 name: "Employees",
                 columns: table => new
                 {
-                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmployeeRole = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ManagerName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    EMPLOYEEID = table.Column<string>(name: "EMPLOYEE_ID", type: "nvarchar(9)", maxLength: 9, nullable: false),
+                    EMPLOYEENAME = table.Column<string>(name: "EMPLOYEE_NAME", type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    EMPLOYEEROLE = table.Column<string>(name: "EMPLOYEE_ROLE", type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    MANAGERNAME = table.Column<string>(name: "MANAGER_NAME", type: "nvarchar(50)", maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
+                    table.PrimaryKey("PK__Employee__CBA14F48C246D7C3", x => x.EMPLOYEEID);
                 });
         }
 
