@@ -22,10 +22,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://example.com",
-                                              "http://www.contoso.com",
-                                              "http://localhost:3001",
-                                              "http://localhost:3000");
+                          policy.WithOrigins("http://localhost:3001", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod().WithMethods("PUT", "DELETE", "GET","POST");
                       });
 });
 var app = builder.Build();
