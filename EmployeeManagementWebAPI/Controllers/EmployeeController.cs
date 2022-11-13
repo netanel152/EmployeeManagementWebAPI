@@ -54,7 +54,6 @@ namespace EmployeeManagementWebAPI.Controllers
             }
             catch (Exception)
             {
-
                 throw new Exception("Not found Managers");
             }
 
@@ -67,6 +66,7 @@ namespace EmployeeManagementWebAPI.Controllers
         {
             try
             {
+                
                 if (employee == null)
                 {
                     return NotFound();
@@ -93,7 +93,12 @@ namespace EmployeeManagementWebAPI.Controllers
                 {
                     return BadRequest();
                 }
-                _dbcontext.Entry(employee).State = EntityState.Modified;
+
+                employeeToEdit.EmployeeName = employee.EmployeeName;
+                employeeToEdit.EmployeeRole = employee.EmployeeRole;
+                employeeToEdit.ManagerName = employee.ManagerName;
+
+                _dbcontext.Entry(employeeToEdit).State = EntityState.Modified;
                 await _dbcontext.SaveChangesAsync();
 
                 return Ok(employeeToEdit);
@@ -110,24 +115,26 @@ namespace EmployeeManagementWebAPI.Controllers
         [Route("delete_employee" + "/{id}")]
         public async Task<IActionResult> DeleteEmployee(string id)
         {
-            if (_dbcontext.Employees == null)
+            try
             {
-                return NotFound();
+                if (_dbcontext.Employees == null)
+                {
+                    return NotFound();
+                }
+                var employee = await _dbcontext.Employees.FindAsync(id);
+                if (employee == null)
+                {
+                    return NotFound();
+                }
+                _dbcontext.Entry(employee).State = EntityState.Deleted;
+                await _dbcontext.SaveChangesAsync();
+
+                return Ok("employee deleted");
             }
-            var employee = await _dbcontext.Employees.FindAsync(id);
-            if (employee == null)
+            catch (Exception)
             {
-                return NotFound();
+                throw new Exception("Error, Employee not deleted");
             }
-            _dbcontext.Entry(employee).State = EntityState.Deleted;
-            await _dbcontext.SaveChangesAsync();
-
-            return Ok("employee deleted");
-        }
-
-        private bool EmployeeExists(string id)
-        {
-            return (_dbcontext.Employees?.Any(e => e.EmployeeId == id)).GetValueOrDefault();
         }
     }
 }
