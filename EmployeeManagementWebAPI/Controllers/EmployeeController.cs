@@ -1,7 +1,6 @@
-﻿using EmployeeManagementWebAPI.Models;
-using EmployeeManagementWebAPI.Services.EmployeeServices;
+﻿using EmployeeManagementWebAPI.Services.EmployeeServices;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EmployeeManagementWebAPI.Controllers
 {
@@ -64,9 +63,9 @@ namespace EmployeeManagementWebAPI.Controllers
             var result = await _employeeService.AddEmployeeDB(employee);
             if (result != null)
             {
-                return Ok(result);
+                return Ok("Employee is Added");
             }
-            return BadRequest("Employee not added");
+            return BadRequest("Employee is not added");
 
         }
         [HttpPost]
@@ -76,7 +75,7 @@ namespace EmployeeManagementWebAPI.Controllers
             var result = await _employeeService.EditEmployeeDB(employee);
             if (result != null)
             {
-                return Ok(result);
+                return Ok("Employee is updated");
             }
             return BadRequest("Employee is not updated");
         }
@@ -90,7 +89,7 @@ namespace EmployeeManagementWebAPI.Controllers
             {
                 return NotFound("Employee not found.");
             }
-            return Ok(result);
+            return Ok("Employee is Deleted");
         }
     }
 }

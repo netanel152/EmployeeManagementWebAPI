@@ -1,4 +1,4 @@
-using EmployeeManagementWebAPI.Models;
+global using EmployeeManagementWebAPI.Models;
 using EmployeeManagementWebAPI.Services.EmployeeServices;
 using Microsoft.EntityFrameworkCore;
 

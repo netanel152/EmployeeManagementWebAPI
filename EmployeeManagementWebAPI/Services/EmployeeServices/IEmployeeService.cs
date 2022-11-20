@@ -1,7 +1,4 @@
-﻿
-using EmployeeManagementWebAPI.Models;
-
-namespace EmployeeManagementWebAPI.Services.EmployeeServices
+﻿namespace EmployeeManagementWebAPI.Services.EmployeeServices
 {
     public interface IEmployeeService
     {
