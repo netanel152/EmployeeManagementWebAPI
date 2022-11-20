@@ -1,5 +1,5 @@
 ﻿using EmployeeManagementWebAPI.Models;
-using Microsoft.AspNetCore.Cors;
+using EmployeeManagementWebAPI.Services.EmployeeServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,27 +9,26 @@ namespace EmployeeManagementWebAPI.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly EmployeeManagementSystemDbContext _dbcontext;
+        private readonly IEmployeeService _employeeService;
 
-        public EmployeeController(EmployeeManagementSystemDbContext context)
+        public EmployeeController(IEmployeeService employeeService)
         {
-            _dbcontext = context;
+            _employeeService = employeeService;
         }
 
         // GET: api/Employees
-        [HttpGet]
-        [Route("employees")]
-        public async Task<ActionResult> GetAllEmployees()
+        [HttpGet("employees")]
+        public async Task<IActionResult> GetAllEmployees()
         {
 
             try
             {
-                List<Employee> employees = await _dbcontext.Employees.ToListAsync();
+                var employees = await _employeeService.GetAllEmployeesDB();
                 if (employees != null)
                 {
                     return Ok(employees);
                 }
-                return Ok("not found employees");
+                return NotFound("not found employees");
             }
             catch (Exception ex)
             {
@@ -39,24 +38,22 @@ namespace EmployeeManagementWebAPI.Controllers
         }
 
         // GET: api/Managers
-        [HttpGet]
-        [Route("managers")]
-        public async Task<ActionResult> GetAllManagers()
+        [HttpGet("managers")]
+        public async Task<IActionResult> GetAllManagers()
         {
             try
             {
-                List<Employee> managers = await _dbcontext.Employees.Where(s => !String.IsNullOrEmpty(s.ManagerName)).ToListAsync();
+                var managers = await _employeeService.GetAllManagersDB();
                 if (managers != null)
                 {
                     return Ok(managers);
                 }
-                return Ok("not found managers");
+                return NotFound("not found managers");
             }
             catch (Exception)
             {
                 throw new Exception("Not found Managers");
             }
-
         }
 
         // POST api/add_new_employee
@@ -64,77 +61,36 @@ namespace EmployeeManagementWebAPI.Controllers
         [Route("add_new_employee")]
         public async Task<ActionResult> AddEmployee(Employee employee)
         {
-            try
+            var result = await _employeeService.AddEmployeeDB(employee);
+            if (result != null)
             {
-                
-                if (employee == null)
-                {
-                    return NotFound();
-                }
-                await _dbcontext.Employees.AddAsync(employee);
-                await _dbcontext.SaveChangesAsync();
-                return CreatedAtAction(nameof(AddEmployee), new { id = employee.EmployeeId }, employee);
-
+                return Ok(result);
             }
-            catch (Exception)
-            {
-                throw new Exception("Error, Employee not created");
-            }
+            return BadRequest("Employee not added");
 
         }
         [HttpPost]
         [Route("edit_employee")]
         public async Task<IActionResult> EditEmployee(Employee employee)
         {
-            try
+            var result = await _employeeService.EditEmployeeDB(employee);
+            if (result != null)
             {
-                Employee employeeToEdit = _dbcontext.Employees.FirstOrDefault(emp => emp.EmployeeId == employee.EmployeeId);
-                if (employeeToEdit == null)
-                {
-                    return BadRequest();
-                }
-
-                employeeToEdit.EmployeeName = employee.EmployeeName;
-                employeeToEdit.EmployeeRole = employee.EmployeeRole;
-                employeeToEdit.ManagerName = employee.ManagerName;
-
-                _dbcontext.Entry(employeeToEdit).State = EntityState.Modified;
-                await _dbcontext.SaveChangesAsync();
-
-                return Ok(employeeToEdit);
+                return Ok(result);
             }
-            catch (Exception)
-            {
-
-                throw new Exception("Error, Employee not edited");
-            }
+            return BadRequest("Employee is not updated");
         }
 
         // POST api/Employees/5
-        [HttpPost]
-        [Route("delete_employee" + "/{id}")]
+        [HttpDelete("delete_employee" + "/{id}")]
         public async Task<IActionResult> DeleteEmployee(string id)
         {
-            try
+            var result = await _employeeService.DeleteEmployeeDB(id);
+            if (result is null)
             {
-                if (_dbcontext.Employees == null)
-                {
-                    return NotFound();
-                }
-                var employee = await _dbcontext.Employees.FindAsync(id);
-                if (employee == null)
-                {
-                    return NotFound();
-                }
-                _dbcontext.Entry(employee).State = EntityState.Deleted;
-                await _dbcontext.SaveChangesAsync();
-
-                return Ok("employee deleted");
+                return NotFound("Employee not found.");
             }
-            catch (Exception)
-            {
-                throw new Exception("Error, Employee not deleted");
-            }
+            return Ok(result);
         }
     }
 }
