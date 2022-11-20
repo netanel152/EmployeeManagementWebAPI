@@ -1,6 +1,5 @@
 ﻿using EmployeeManagementWebAPI.Services.EmployeeServices;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EmployeeManagementWebAPI.Controllers
 {
@@ -19,45 +18,28 @@ namespace EmployeeManagementWebAPI.Controllers
         [HttpGet("employees")]
         public async Task<IActionResult> GetAllEmployees()
         {
-
-            try
+            var employees = await _employeeService.GetAllEmployeesDB();
+            if (employees != null)
             {
-                var employees = await _employeeService.GetAllEmployeesDB();
-                if (employees != null)
-                {
-                    return Ok(employees);
-                }
-                return NotFound("not found employees");
+                return Ok(employees);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-
+            return NotFound("not found employees");
         }
 
         // GET: api/Managers
         [HttpGet("managers")]
         public async Task<IActionResult> GetAllManagers()
         {
-            try
+            var managers = await _employeeService.GetAllManagersDB();
+            if (managers != null)
             {
-                var managers = await _employeeService.GetAllManagersDB();
-                if (managers != null)
-                {
-                    return Ok(managers);
-                }
-                return NotFound("not found managers");
+                return Ok(managers);
             }
-            catch (Exception)
-            {
-                throw new Exception("Not found Managers");
-            }
+            return NotFound("not found managers");
         }
 
         // POST api/add_new_employee
-        [HttpPost]
-        [Route("add_new_employee")]
+        [HttpPost("add_new_employee")]
         public async Task<ActionResult> AddEmployee(Employee employee)
         {
             var result = await _employeeService.AddEmployeeDB(employee);
@@ -66,10 +48,9 @@ namespace EmployeeManagementWebAPI.Controllers
                 return Ok("Employee is Added");
             }
             return BadRequest("Employee is not added");
-
         }
-        [HttpPost]
-        [Route("edit_employee")]
+
+        [HttpPost("edit_employee")]
         public async Task<IActionResult> EditEmployee(Employee employee)
         {
             var result = await _employeeService.EditEmployeeDB(employee);
