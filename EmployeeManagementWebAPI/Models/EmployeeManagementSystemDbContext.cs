@@ -6,9 +6,6 @@ namespace EmployeeManagementWebAPI.Models;
 
 public partial class EmployeeManagementSystemDbContext : DbContext
 {
-    public EmployeeManagementSystemDbContext()
-    {
-    }
 
     public EmployeeManagementSystemDbContext(DbContextOptions<EmployeeManagementSystemDbContext> options)
         : base(options)
